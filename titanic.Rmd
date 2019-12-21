@@ -1,0 +1,115 @@
+---
+title: "Titanic Data"
+output: html_notebook
+---
+
+#Introduction
+Welcome to my analysis of the famous Titanic dataset. 
+
+##Loading the data and requisite packages
+
+Rather than worry about downloading the data into .csv, i simply installed the titanic package. it can be downloaded using 'install.packages("titanic")'. For more information visit https://www.rdocumentation.org/packages/titanic/versions/0.1.0
+
+I will first load the data. 
+```{r}
+library(titanic)
+```
+I can now access the data using any of these calls:
+titanic_train :will call the training set from kaggle.
+titanic_test :will call the testing set from kaggle. 
+
+## Explanation of variables
+
+Variable	Definition	Key
+survival	Survival	0 = No, 1 = Yes
+pclass	Ticket class	1 = 1st, 2 = 2nd, 3 = 3rd
+sex	Sex	
+Age	Age in years	
+sibsp	# of siblings / spouses aboard the Titanic	
+parch	# of parents / children aboard the Titanic	
+ticket	Ticket number	
+fare	Passenger fare	
+cabin	Cabin number	
+embarked	Port of Embarkation	C = Cherbourg, Q = Queenstown, S = Southampton
+
+#Data wrangling and cleansing
+
+A great property about the titanic dataset is that it contatins many missing values and needs wrangling to become useful. Just like real world business data. I will wrangle the data to also improve application to functions later. 
+
+```{r}
+titan_data<-as_tibble(titanic_train)
+titan_data
+```
+
+First, we must make sure that all the variables are in their correct form. For instance, Survived, PClass, and Sex must be factors
+```{r}
+titan_data %>% mutate(
+    
+)
+
+```
+
+
+
+We begin by analyzing the missingness of the data. Using the following code we can see that the only area with missing values is in age. This informs the validity of using age as a predictor since we may or may not have as powerful of a model if we include it. We may also want to try a different option such as throwing it out or imputing the values.  
+```{r}
+vis_miss(titan_data)
+```
+we can also determine how many missing values there are using 
+```{r}
+sum(is.na(titan_data))
+```
+Since 177 observations are missing data, throwing them out would signfiicantly hurt out data, since we would be losing about a 2/9 of our data. 
+
+I will attempt to impute the missing values by using the missForest package. We are essentially going to impute the values using an ensemble of decision trees.
+```{r}
+library(missForest)
+```
+
+
+```{r}
+impute_data <- mice(titan_data[, !names(titan_data) %in% c('PassengerId','Name','Ticket','Cabin','Family','Surname','Survived')], method='rf') 
+titan_data_imp <- complete(impute_data)
+```
+
+Lets check and see if there is any missing data
+```{r}
+vis_miss(titan_data_imp)
+```
+Now lets examine the original data and the imputed data set and look for differences
+```{r}
+ggplot(titan_data, aes(x = Age, fill="")) + geom_histogram(position = "identity")
+
+ggplot(titan_data_imp, aes(x = Age, fill="")) + geom_histogram(position = "identity")
+```
+
+It seems like a reasonable imputation. The overal distribution did not change significantly. 
+
+#Exploratory Data Analysis (EDA)
+
+I will be utilizing ggplot2 for the variety of EDA. I will also be using many other tidyverse packages, so i will load them here.
+```{r}
+library(tidyverse)
+```
+
+Now I want to explore a few general areas
+
+Which gender was more likely to survive?
+```{r}
+titanic %>% 
+```
+
+
+Did family size influence surival?
+
+Did age influence survival?
+
+Did ticket class improve survival chance?
+
+
+
+
+
+
+
+
